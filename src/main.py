@@ -2,31 +2,40 @@ import time
 
 import platform
 import subprocess as sp
+import random
+import datetime
 
 from datetime import date
 from datetime import datetime
 
-
 trustServer = ""
 evalServer = ""
 past = ""
+kontagailua = 0
+booleanCounter = 0
 
 sleepTime = 120
 
+
 def setUp():
-    global trustServer, evalServer
+    global trustServer, evalServer, kontagailua, booleanCounter
 
     trustServer = "google.com"
     evalServer = "egela.ehu.eus"
+    kontagailua = 0
+    booleanCounter = 0
     recordData("Start")
 
+
 def main():
+    global kontagailua, booleanCounter
     setUp()
     prevState = 0
     sleepTime = 60
     while True:
 
         state, mean = ipcheck(evalServer, trustServer)
+        estado = mean
         if state == 0 and prevState != 0:
             if confirmStatus(state, 5, 0.2):
                 mean = "IS_Trust_" + mean
@@ -42,17 +51,34 @@ def main():
                 mean = "NoTrust_" + mean
             sleepTime = 60
 
-
         prevState = state
         recordData(mean)
         now = datetime.now()
         current_time = now.strftime("%H:%M")
         print(current_time + " " + mean)
+        # abrir archivo de frases aleatorias para decir cuando eGela no ha caído
+        g = open("phrases.txt", "r")
+        i = random.randint(0, 6)
+        for z in range(i, 6):
+            frase = g.readline()
+        if estado == "ON":
+            kontagailua = kontagailua + 1
+            booleanCounter = booleanCounter + 1
+            if estado == "ON" and booleanCounter == 15:
+                print(frase)
+                booleanCounter = 0
+        else:
+            booleanCounter = 0
+        # if mean == "OFF" || mean == "T-OFF/V-ON" || mean == "T-OFF/V-OFF":
+
         time.sleep(sleepTime)
 
+
 def ipcheck(target, trust):
-    statusT, resultT = sp.getstatusoutput("ping " + ("-n 1 " if platform.system().lower() == "windows" else "-c 1 ") + str(trust))
-    statusH, resultH = sp.getstatusoutput("ping " + ("-n 1 " if platform.system().lower() == "windows" else "-c 1 ") + str(target))
+    statusT, resultT = sp.getstatusoutput(
+        "ping " + ("-n 1 " if platform.system().lower() == "windows" else "-c 1 ") + str(trust))
+    statusH, resultH = sp.getstatusoutput(
+        "ping " + ("-n 1 " if platform.system().lower() == "windows" else "-c 1 ") + str(target))
     if statusT == 0:
         if statusH == 0:
             # print("System " + str(target) + " is UP !")
