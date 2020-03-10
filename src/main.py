@@ -121,7 +121,7 @@ def recordData(data):
     f.write(d1 + current_time + " --> " + str(data) + " \n")
 
     f.close()
-    past = today.strftime("%Y/%m/%d") + " : "
+    past = today.strftime("%m/%d") + " : "
 
 
 def confirmStatus(status, times, delay):
