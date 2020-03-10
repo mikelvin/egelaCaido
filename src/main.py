@@ -24,6 +24,7 @@ def setUp():
     evalServer = "egela.ehu.eus"
     kontagailua = 0
     booleanCounter = 0
+    g = open("examp", "r")
     recordData("Start")
 
 
@@ -56,10 +57,13 @@ def main():
         now = datetime.now()
         current_time = now.strftime("%H:%M")
         print(current_time + " " + mean)
+
         # abrir archivo de frases aleatorias para decir cuando eGela no ha caído
         g = open("phrases.txt", "r")
-        i = random.randint(0, 6)
-        for z in range(i, 6):
+        #Averiguar cuantas lineas tiene el archivo de frases
+        lineas = contarLineas("phrases.txt")
+        i = random.randint(0, lineas)
+        for z in range(i, lineas):
             frase = g.readline()
         if estado == "ON":
             kontagailua = kontagailua + 1
@@ -133,5 +137,11 @@ def confirmStatus(status, times, delay):
 
     return e
 
+def contarLineas(file):
+    g = open(file, "r")
+    kont = 0
+    for line in g:
+        kont += 1
+    return kont
 
 main()
