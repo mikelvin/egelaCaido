@@ -26,6 +26,8 @@ phrasesON = 0
 phrasesOFF = 0
 
 sleepTime = 120
+praOn = ControlFile("phrasesON.txt", 5)
+praOff = ControlFile("phrasesOFF.txt", 5)
 
 
 def setUp():
@@ -37,24 +39,9 @@ def setUp():
     booleanCounter = 0
     recordData("Start")
 
-
-def howManyPhrasesON():
-    i = 0
-    g = open("phrasesON.txt", "r")
-    return len(g.readlines()) - 1
-
-
-def howManyPhrasesOFF():
-    i = 0
-    g = open("phrasesOFF.txt", "r")
-    return len(g.readlines()) - 1
-
-
 def main():
     global kontagailua, booleanCounter
     setUp()
-    howManyOn = howManyPhrasesON()
-    howManyOFF = howManyPhrasesOFF()
     prevState = 0
     sleepTime = 60
     while True:
@@ -82,27 +69,22 @@ def main():
         current_time = now.strftime("%H:%M")
         print(current_time + " " + mean)
         # abrir archivo de frases aleatorias para decir cuando eGela no ha caído
-        g = open("phrasesON.txt", "r")
-        f = open("phrasesOFF.txt", "r")
-        i = random.randint(0, howManyOn)
-        for z in range(i, howManyOn):
-            fraseON = g.readline()
+
         if estado == "ON":
             kontagailua = kontagailua + 1
             booleanCounter = booleanCounter + 1
-            if estado == "ON" and booleanCounter == 60:
+            if booleanCounter == 60:
+                frase = praOn.getRandomNoRepLine()
                 print(fraseON)
-                api.update_status(fraseON)
+                api.update_status(frase)
                 booleanCounter = 0
         else:
             booleanCounter = 0
-            j = random.randint(0, howManyOFF)
-            for z in range(j, howManyOFF):
-                fraseOFF = f.readline()
             if mean == "OFF":
+                frase = praOff.getRandomNoRepLine()
                 api.update_status(fraseOFF)
                 # pausa de 30 segundos para que si se ha caído no tuitee cada minuto que está caída
-                time.sleep(1800)
+                time.sleep(30)
 
         time.sleep(sleepTime)
 
@@ -132,7 +114,6 @@ def ipcheck(target, trust):
 
     return ema, meaning
 
-
 def recordData(data):
     global past
 
@@ -152,7 +133,6 @@ def recordData(data):
     f.close()
     past = today.strftime("%m/%d") + " : "
 
-
 def confirmStatus(status, times, delay):
     global trustServer, evalServer
     e = True
@@ -165,6 +145,38 @@ def confirmStatus(status, times, delay):
         time.sleep(delay)
 
     return e
+
+class ControlFile:
+
+    def __init__(self, archivo, dif):
+        self.file = archivo
+        self.prevLista = [0]*dif
+        self.lines = self.howManyPhrasesON()
+
+    def getRandomNoRepLine(self):
+        g = open(self.file, "r")
+        i = random.randint(1, self.lines)
+        while i in self.prevLista:
+            i = random.randint(1, self.lines)
+        self.desplazaLista(i)
+        for z in range(0, i):
+            frase = g.readline()
+        return frase
+
+    def desplazaLista(self,valor):
+        i = len(self.prevLista)-1
+        while i > 0:
+            self.prevLista[i] = self.prevLista[i-1]
+            i -= 1
+        self.prevLista[0] = valor
+
+    def howManyPhrasesON(self):
+        i = 0
+        g = open(self.file, "r")
+        l = len(g.readlines())
+        g.close()
+        return l
+
 
 
 main()
