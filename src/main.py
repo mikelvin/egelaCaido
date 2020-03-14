@@ -1,18 +1,29 @@
 import time
-
 import platform
 import subprocess as sp
 import random
 import datetime
+import tweepy
 
 from datetime import date
 from datetime import datetime
+
+consumer_key = "hr8ClRl4AniT2jdRHSTfkKuWu"
+consumer_secret = "MHQpKBQCPFoRztKi4Z4MIKkCccgDtwTFQrXb4bLO2Xev5Mr5Yv"
+access_token = "1235232986909601793-YORkwEC1S6879MssIlsWnpYsgxtYgR"
+access_token_secret = "BboF9MdYCZ8kgFDAQkSTXkSK5nOpVh23juDhqHba6vQGv"
+
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_token_secret)
+api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 trustServer = ""
 evalServer = ""
 past = ""
 kontagailua = 0
 booleanCounter = 0
+phrasesON = 0
+phrasesOFF = 0
 
 sleepTime = 120
 
@@ -24,13 +35,26 @@ def setUp():
     evalServer = "egela.ehu.eus"
     kontagailua = 0
     booleanCounter = 0
-    g = open("examp", "r")
     recordData("Start")
+
+
+def howManyPhrasesON():
+    i = 0
+    g = open("phrasesON.txt", "r")
+    return len(g.readlines()) - 1
+
+
+def howManyPhrasesOFF():
+    i = 0
+    g = open("phrasesOFF.txt", "r")
+    return len(g.readlines()) - 1
 
 
 def main():
     global kontagailua, booleanCounter
     setUp()
+    howManyOn = howManyPhrasesON()
+    howManyOFF = howManyPhrasesOFF()
     prevState = 0
     sleepTime = 60
     while True:
@@ -57,23 +81,28 @@ def main():
         now = datetime.now()
         current_time = now.strftime("%H:%M")
         print(current_time + " " + mean)
-
         # abrir archivo de frases aleatorias para decir cuando eGela no ha caído
-        g = open("phrases.txt", "r")
-        #Averiguar cuantas lineas tiene el archivo de frases
-        lineas = contarLineas("phrases.txt")
-        i = random.randint(0, lineas)
-        for z in range(i, lineas):
-            frase = g.readline()
+        g = open("phrasesON.txt", "r")
+        f = open("phrasesOFF.txt", "r")
+        i = random.randint(0, howManyOn)
+        for z in range(i, howManyOn):
+            fraseON = g.readline()
         if estado == "ON":
             kontagailua = kontagailua + 1
             booleanCounter = booleanCounter + 1
-            if estado == "ON" and booleanCounter == 15:
-                print(frase)
+            if estado == "ON" and booleanCounter == 60:
+                print(fraseON)
+                api.update_status(fraseON)
                 booleanCounter = 0
         else:
             booleanCounter = 0
-        # if mean == "OFF" || mean == "T-OFF/V-ON" || mean == "T-OFF/V-OFF":
+            j = random.randint(0, howManyOFF)
+            for z in range(j, howManyOFF):
+                fraseOFF = f.readline()
+            if mean == "OFF":
+                api.update_status(fraseOFF)
+                # pausa de 30 segundos para que si se ha caído no tuitee cada minuto que está caída
+                time.sleep(1800)
 
         time.sleep(sleepTime)
 
@@ -137,11 +166,5 @@ def confirmStatus(status, times, delay):
 
     return e
 
-def contarLineas(file):
-    g = open(file, "r")
-    kont = 0
-    for line in g:
-        kont += 1
-    return kont
 
 main()
