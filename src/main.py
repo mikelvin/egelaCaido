@@ -7,6 +7,7 @@ import tweepy
 
 from datetime import date
 from datetime import datetime
+from ControlFile import ControlFile
 
 consumer_key = "hr8ClRl4AniT2jdRHSTfkKuWu"
 consumer_secret = "MHQpKBQCPFoRztKi4Z4MIKkCccgDtwTFQrXb4bLO2Xev5Mr5Yv"
@@ -22,13 +23,13 @@ evalServer = ""
 past = ""
 kontagailua = 0
 booleanCounter = 0
-phrasesON = 0
-phrasesOFF = 0
+# phrasesON = 0
+# phrasesOFF = 0
+timer = 0
 
 sleepTime = 120
 praOn = ControlFile("phrasesON.txt", 5)
 praOff = ControlFile("phrasesOFF.txt", 5)
-
 
 def setUp():
     global trustServer, evalServer, kontagailua, booleanCounter
@@ -40,19 +41,19 @@ def setUp():
     recordData("Start")
 
 def main():
-    global kontagailua, booleanCounter
+    global kontagailua, booleanCounter, timer
     setUp()
     prevState = 0
     sleepTime = 60
     while True:
 
         state, mean = ipcheck(evalServer, trustServer)
-        estado = mean
-        if state == 0 and prevState != 0:
+
+        if state == 0:
             if confirmStatus(state, 5, 0.2):
-                mean = "IS_Trust_" + mean
+                mean = "Trust_" + mean
             else:
-                mean = "IS_NTrust_" + mean
+                mean = "NTrust_" + mean
 
             sleepTime = 5
 
@@ -63,29 +64,33 @@ def main():
                 mean = "NoTrust_" + mean
             sleepTime = 60
 
-        prevState = state
-        recordData(mean)
-        now = datetime.now()
-        current_time = now.strftime("%H:%M")
-        print(current_time + " " + mean)
+
+
         # abrir archivo de frases aleatorias para decir cuando eGela no ha caído
 
-        if estado == "ON":
+        if state == 1:
             kontagailua = kontagailua + 1
             booleanCounter = booleanCounter + 1
             if booleanCounter == 60:
                 frase = praOn.getRandomNoRepLine()
-                print(fraseON)
+                print(frase)
                 api.update_status(frase)
                 booleanCounter = 0
         else:
             booleanCounter = 0
-            if mean == "OFF":
+            if state == 0 and prevState == 1:
                 frase = praOff.getRandomNoRepLine()
-                api.update_status(fraseOFF)
+                api.update_status(frase)
                 # pausa de 30 segundos para que si se ha caído no tuitee cada minuto que está caída
                 time.sleep(30)
 
+
+        recordData(mean)
+        now = datetime.now()
+        current_time = now.strftime("%H:%M")
+        print(current_time + " " + mean)
+
+        prevState = state
         time.sleep(sleepTime)
 
 
@@ -146,37 +151,15 @@ def confirmStatus(status, times, delay):
 
     return e
 
-class ControlFile:
-
-    def __init__(self, archivo, dif):
-        self.file = archivo
-        self.prevLista = [0]*dif
-        self.lines = self.howManyPhrasesON()
-
-    def getRandomNoRepLine(self):
-        g = open(self.file, "r")
-        i = random.randint(1, self.lines)
-        while i in self.prevLista:
-            i = random.randint(1, self.lines)
-        self.desplazaLista(i)
-        for z in range(0, i):
-            frase = g.readline()
-        return frase
-
-    def desplazaLista(self,valor):
-        i = len(self.prevLista)-1
-        while i > 0:
-            self.prevLista[i] = self.prevLista[i-1]
-            i -= 1
-        self.prevLista[0] = valor
-
-    def howManyPhrasesON(self):
-        i = 0
-        g = open(self.file, "r")
-        l = len(g.readlines())
-        g.close()
-        return l
 
 
 
-main()
+
+
+print(time.monotonic())
+print("time.monotonic()")
+time.sleep(1)
+print(time.time())
+print(time.monotonic())
+print(time.perf_counter())
+#main()
