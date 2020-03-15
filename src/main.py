@@ -4,13 +4,13 @@ import platform
 import subprocess as sp
 import datetime
 
-from src.controlTweepy import twittea
+from src.controlTweepy import *
 
 from datetime import date
 from datetime import datetime
 from src.ControlFile import ControlFile
 
-# Arreglo
+warnToMD = True
 
 trustServer = ""
 evalServer = ""
@@ -32,17 +32,19 @@ except FileNotFoundError as e:
     except FileNotFoundError as e:
         praOn = ControlFile("../egelaCaido/src/phrasesON.txt", 5)
 
+
 try:
     praOff = ControlFile(cwd + "\egelaCaido\src\phrasesOFF.txt", 5)
 except FileNotFoundError as e:
     try:
         praOff = ControlFile(cwd + "/egelaCaido/src/phrasesOFF.txt", 5)
     except FileNotFoundError as e:
-        praOff = ControlFile("../egelaCaido/src/phrasesOFF.txt", 5)
+        praOn = ControlFile("../egelaCaido/src/phrasesOFF.txt", 5)
 
 
 
 def setUp():
+
     print("\nSTART")
     global trustServer, evalServer, kontagailua, booleanCounter
 
@@ -52,6 +54,11 @@ def setUp():
     booleanCounter = 0
     recordData("Start")
 
+    today = date.today()
+    now = datetime.now()
+
+
+    sendMdToMikel("Programa Iniciado a las " + time.ctime())
 
 def main():
     global kontagailua, booleanCounter
@@ -114,6 +121,8 @@ def main():
                 booleanCounter = 0
                 if state == 3:
                     print("Problemas de conexion")
+                    if prevState != 3:
+                        sendMdToMikel("Problemas de conexion", warnToMD)
 
         recordData(mean)
         now = datetime.now()
@@ -243,3 +252,4 @@ def confirmStatus(status, times, delay):
 # print(time.perf_counter())
 
 # main()
+# print(time.ctime())
