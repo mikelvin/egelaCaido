@@ -58,7 +58,8 @@ def setUp():
     now = datetime.now()
 
 
-    sendMdToMikel("Programa Iniciado a las " + time.ctime(), notifyWhenTweetToUser)
+    sendMdToUsers("Programa Iniciado a las "
+                  + time.ctime()  + "\n Configuracion del bot: \n Tweets bloqueados: " + blockTwitterForTesting, notifyWhenTweetToUser)
 
 def main():
     global kontagailua, booleanCounter

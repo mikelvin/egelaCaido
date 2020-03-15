@@ -57,7 +57,7 @@ def prevTweets(cuant):
 
     return aar
 
-def sendMdToMikel(text, confirm = False):
+def sendMdToUsers(text, confirm = False):
     if notifyWhenTweetToUser and confirm:
         for userId in config.listOfidsOfTwitterUser:
             api.send_direct_message(userId, text)
