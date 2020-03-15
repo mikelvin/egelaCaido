@@ -10,6 +10,7 @@ from datetime import date
 from datetime import datetime
 from src.ControlFile import ControlFile
 
+# Arreglo
 
 trustServer = ""
 evalServer = ""
