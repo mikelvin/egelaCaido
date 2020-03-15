@@ -1,3 +1,4 @@
+import os
 import time
 import platform
 import subprocess as sp
@@ -16,10 +17,22 @@ past = ""
 kontagailua = 0
 booleanCounter = 0
 
+cwd = os.getcwd()  # Get the current working directory (cwd)
+files = os.listdir(cwd)  # Get all the files in that directory
+print("Files in %r: %s" % (cwd, files))
 
 sleepTime = 120
-praOn = ControlFile("phrasesON.txt", 5)
-praOff = ControlFile("phrasesOFF.txt", 5)
+
+try:
+    praOn = ControlFile(cwd + "\egelaCaido\src\phrasesON.txt", 5)
+except FileNotFoundError as e:
+    praOn = ControlFile("../egelaCaido/src/phrasesON.txt", 5)
+
+try:
+    praOn = ControlFile(cwd + "\egelaCaido\src\phrasesOFF.txt", 5)
+except FileNotFoundError as e:
+    praOff = ControlFile("../egelaCaido/src/phrasesOFF.txt", 5)
+
 
 
 def setUp():
@@ -169,7 +182,10 @@ def ipcheck(target, trust):
 def recordData(data):
     global past
 
-    f = open("data11.txt", "a+")
+    try:
+        f = open(cwd + "\egelaCaido\src\data11.txt", "a+")
+    except FileNotFoundError as e:
+        f = open("../egelaCaido/src/data11.txt", "a+")
 
     today = date.today()
     now = datetime.now()
@@ -219,4 +235,4 @@ def confirmStatus(status, times, delay):
 # print(time.monotonic())
 # print(time.perf_counter())
 
-main()
+# main()
