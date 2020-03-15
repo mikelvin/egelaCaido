@@ -59,7 +59,7 @@ def setUp():
 
 
     sendMdToUsers("Programa Iniciado a las "
-                  + time.ctime()  + "\n Configuracion del bot: \n Tweets bloqueados: " + blockTwitterForTesting, notifyWhenTweetToUser)
+                  + time.ctime()  + "\n Configuracion del bot: \n Tweets bloqueados: " + str(blockTwitterForTesting), notifyWhenTweetToUser)
 
 def main():
     global kontagailua, booleanCounter
