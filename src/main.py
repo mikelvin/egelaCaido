@@ -58,7 +58,7 @@ def setUp():
     now = datetime.now()
 
 
-    sendMdToMikel("Programa Iniciado a las " + time.ctime())
+    sendMdToMikel("Programa Iniciado a las " + time.ctime(), notifyWhenTweetToUser)
 
 def main():
     global kontagailua, booleanCounter
