@@ -1,8 +1,8 @@
 import random
-from builtins import print
-
+from controlTweepy import prevTweets
 
 class ControlFile:
+
 
     def __init__(self, archivo, dif):
         self.file = archivo
@@ -12,12 +12,14 @@ class ControlFile:
         if self.lines <= dif:
             dif = self.lines - 1
 
-        self.prevLista = [0]*dif
+        self.prevLista = self.updatePrevLista(dif)
 
 
     # Coje una frase aleatoria y despues de haber comprobado que no se ha seleccionado aun, la devuelve.
     # Si se ha seleccionado entonces elige otra
+
     def getRandomNoRepLine(self):
+        frase = ""
         g = open(self.file, "r")
         i = random.randint(1, self.lines)
         while i in self.prevLista:
@@ -43,3 +45,32 @@ class ControlFile:
         l = len(g.readlines())
         g.close()
         return l
+
+    # Se encarga de buscar una frase en el archivo devolviendo la ubicacion de su linea
+    def findFraseLine(self, frase):
+        g = open(self.file, "r")
+        frase += '\n'
+        i = 0
+        f = False
+        for line in g.readlines():
+            i += 1
+            if line == frase:
+                f = True
+                break
+        if not f:
+            i = 0
+        return i
+
+    #Obtiene los tweets recientes y usando la busqueda de frase añade esas frases a la lista de frases previas
+    def updatePrevLista(self, cont):
+        a = [0]*cont
+        f = prevTweets(cont + 10)
+        i = 0
+        for frases in f:
+            h = self.findFraseLine(frases)
+            if h != 0 and i < cont:
+                a[i] = h
+                i += 1
+            elif i >= cont:
+                break
+        return a

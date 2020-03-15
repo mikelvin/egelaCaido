@@ -3,20 +3,15 @@ import platform
 import subprocess as sp
 import random
 import datetime
-import tweepy
+
+from controlTweepy import *
 
 from datetime import date
 from datetime import datetime
 from ControlFile import ControlFile
 
-consumer_key = "hr8ClRl4AniT2jdRHSTfkKuWu"
-consumer_secret = "MHQpKBQCPFoRztKi4Z4MIKkCccgDtwTFQrXb4bLO2Xev5Mr5Yv"
-access_token = "1235232986909601793-YORkwEC1S6879MssIlsWnpYsgxtYgR"
-access_token_secret = "BboF9MdYCZ8kgFDAQkSTXkSK5nOpVh23juDhqHba6vQGv"
+blockTwitterForTesting = True
 
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_token_secret)
-api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 trustServer = ""
 evalServer = ""
@@ -48,39 +43,35 @@ def main():
     while True:
 
         state, mean = ipcheck(evalServer, trustServer)
+        prove = confirmStatus(state, 5, 0.2)
+
+        if prove:
+            mean = "Trust_" + mean
+        else:
+            mean = "NoTrust_" + mean
 
         if state == 0:
-            if confirmStatus(state, 5, 0.2):
-                mean = "Trust_" + mean
-            else:
-                mean = "NTrust_" + mean
-
             sleepTime = 5
 
         elif state != 0:
-            if confirmStatus(state, 5, 0.2):
-                mean = "Trust_" + mean
-            else:
-                mean = "NoTrust_" + mean
             sleepTime = 60
-
-
 
         # abrir archivo de frases aleatorias para decir cuando eGela no ha caído
 
-        if state == 1:
+        #TODO Es Muy importante arreglar el reloj para que no twittee cada nada
+        if state == 1 and prove:
             kontagailua = kontagailua + 1
             booleanCounter = booleanCounter + 1
             if booleanCounter == 60:
-                frase = praOn.getRandomNoRepLine()
+                frase = praOn.getRandomNoRepLine
                 print(frase)
-                api.update_status(frase)
+                twitea(frase)
                 booleanCounter = 0
         else:
             booleanCounter = 0
-            if state == 0 and prevState == 1:
-                frase = praOff.getRandomNoRepLine()
-                api.update_status(frase)
+            if prove and state == 0 and prevState == 1:
+                frase = praOff.getRandomNoRepLine
+                twitea(frase)
                 # pausa de 30 segundos para que si se ha caído no tuitee cada minuto que está caída
                 time.sleep(30)
 
@@ -154,7 +145,7 @@ def confirmStatus(status, times, delay):
 
 
 
-
+print(api)
 
 print(time.monotonic())
 print("time.monotonic()")
