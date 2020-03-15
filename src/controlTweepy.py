@@ -11,6 +11,20 @@ auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 blockTwitterForTesting = True
+if True:
+    print("------------BOT CONTROL------------")
+    print("Si desea activar el bot entonces:")
+    if input("Esta seguro? [y / n]: ") == "y":
+        if input("Escriba 'ENABLE_TWEET': \n") == "ENABLE_TWEET":
+            print("BLOQUEO de twitteo DESACTIVADO.")
+            blockTwitterForTesting = False
+        else:
+            print("Cancelado")
+            print("El bloqueo NO se ha DESACTIVADO, Modo Seguro")
+    else:
+        print("El bloqueo NO se ha DESACTIVADO, Modo Seguro")
+    print("-----------------------------------")
+
 
 def twittea(frase):
     global blockTwitterForTesting
@@ -21,11 +35,12 @@ def twittea(frase):
     else:
         api.update_status(frase)
 
+
 def prevTweets(cuant):
     aar = []
     for status in tweepy.Cursor(api.user_timeline).items(cuant):
-        #print(status._api)
-        #print(status._json['text'])
+        # print(status._api)
+        # print(status._json['text'])
         aar.append(status._json['text'])
 
     return aar

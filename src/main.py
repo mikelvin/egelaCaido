@@ -21,7 +21,9 @@ sleepTime = 120
 praOn = ControlFile("phrasesON.txt", 5)
 praOff = ControlFile("phrasesOFF.txt", 5)
 
+
 def setUp():
+    print("\nSTART")
     global trustServer, evalServer, kontagailua, booleanCounter
 
     trustServer = "google.com"
@@ -30,17 +32,17 @@ def setUp():
     booleanCounter = 0
     recordData("Start")
 
+
 def main():
     global kontagailua, booleanCounter
     tiempoCaido = 0
-    timer = time.monotonic()
-    timeTweet = timer
+    # timer = time.monotonic()
 
     setUp()
     prevState = -8
     sleepTime = 60
     while True:
-        timer = time.monotonic()
+        # timer = time.monotonic()
 
         state, mean = ipcheck(evalServer, trustServer)
         prove = confirmStatus(state, 5, 0.2)
@@ -93,9 +95,6 @@ def main():
                 if state == 3:
                     print("Problemas de conexion")
 
-
-
-
         recordData(mean)
         now = datetime.now()
         current_time = now.strftime("%H:%M")
@@ -103,6 +102,7 @@ def main():
         if prove:
             prevState = state
         time.sleep(sleepTime)
+
 
 def transformTime(tiempoCaido):
     tiempoCaido = int(tiempoCaido)
@@ -139,6 +139,7 @@ def transformTime(tiempoCaido):
         frase += "s"
     return frase
 
+
 def ipcheck(target, trust):
     statusT, resultT = sp.getstatusoutput(
         "ping " + ("-n 1 " if platform.system().lower() == "windows" else "-c 1 ") + str(trust))
@@ -164,6 +165,7 @@ def ipcheck(target, trust):
 
     return ema, meaning
 
+
 def recordData(data):
     global past
 
@@ -182,6 +184,7 @@ def recordData(data):
 
     f.close()
     past = today.strftime("%m/%d") + " : "
+
 
 def confirmStatus(status, times, delay):
     global trustServer, evalServer
@@ -204,17 +207,16 @@ def confirmStatus(status, times, delay):
     return not stop, a
 
 
-#ere = time.monotonic()
-#trustServer = "google.com"
-#evalServer = "egela.ehu.eus"
-#print(confirmStatus(1,10,1))
-#print(time.monotonic()-ere)
+# ere = time.monotonic()
+# trustServer = "google.com"
+# evalServer = "egela.ehu.eus"
+# print(confirmStatus(1,10,1))
+# print(time.monotonic()-ere)
 
-#print("time.monotonic()")
-#time.sleep(1)
-#print(time.time())
-#print(time.monotonic())
-#print(time.perf_counter())
+# print("time.monotonic()")
+# time.sleep(1)
+# print(time.time())
+# print(time.monotonic())
+# print(time.perf_counter())
 
 main()
-
