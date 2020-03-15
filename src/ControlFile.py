@@ -1,12 +1,13 @@
 import random
-from controlTweepy import prevTweets
+
+from src.controlTweepy import prevTweets
 
 class ControlFile:
 
 
     def __init__(self, archivo, dif):
         self.file = archivo
-        self.lines = self.howManyPhrasesON()
+        self.lines = self.howManyPhrasesFile()
         # Puede ser que no se escriban tantas lineas como posiciones en self.prevLista, En este caso ocurriria un error
         # ya que una vez todas las frases esten dentro de self.prevLista, el programa dejara de imprimir mas
         if self.lines <= dif:
@@ -39,7 +40,7 @@ class ControlFile:
         self.prevLista[0] = valor
 
     #Esta funcion cuenta cuantas lineas/frases tiene el docuemento asignado al objeto (self.file)
-    def howManyPhrasesON(self):
+    def howManyPhrasesFile(self):
         i = 0
         g = open(self.file, "r")
         l = len(g.readlines())

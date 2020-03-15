@@ -1,16 +1,13 @@
 import time
 import platform
 import subprocess as sp
-import random
 import datetime
 
-from controlTweepy import *
+from src.controlTweepy import twittea
 
 from datetime import date
 from datetime import datetime
-from ControlFile import ControlFile
-
-blockTwitterForTesting = True
+from src.ControlFile import ControlFile
 
 
 trustServer = ""
@@ -18,9 +15,7 @@ evalServer = ""
 past = ""
 kontagailua = 0
 booleanCounter = 0
-# phrasesON = 0
-# phrasesOFF = 0
-timer = 0
+
 
 sleepTime = 120
 praOn = ControlFile("phrasesON.txt", 5)
@@ -36,11 +31,16 @@ def setUp():
     recordData("Start")
 
 def main():
-    global kontagailua, booleanCounter, timer
+    global kontagailua, booleanCounter
+    tiempoCaido = 0
+    timer = time.monotonic()
+    timeTweet = timer
+
     setUp()
-    prevState = 0
+    prevState = -8
     sleepTime = 60
     while True:
+        timer = time.monotonic()
 
         state, mean = ipcheck(evalServer, trustServer)
         prove = confirmStatus(state, 5, 0.2)
@@ -50,7 +50,7 @@ def main():
         else:
             mean = "NoTrust_" + mean
 
-        if state == 0:
+        if state == 0 and prove:
             sleepTime = 5
 
         elif state != 0:
@@ -58,32 +58,86 @@ def main():
 
         # abrir archivo de frases aleatorias para decir cuando eGela no ha caído
 
-        #TODO Es Muy importante arreglar el reloj para que no twittee cada nada
-        if state == 1 and prove:
-            kontagailua = kontagailua + 1
-            booleanCounter = booleanCounter + 1
-            if booleanCounter == 60:
-                frase = praOn.getRandomNoRepLine
-                print(frase)
-                twitea(frase)
+        # TODO Es Muy importante arreglar el reloj para que no twittee cada nada
+        if prove:
+            if state == 1:
+                # Si anteriormente estaba desactivado entonces va a enviar un tweet notificando que vuelve a estar activo
+                # En este mismo programa tambien se calcula cuanto tiempo esta activado
+                if prevState == 0:
+                    tiempoCaido = int(round(time.monotonic()-tiempoCaido))
+                    if tiempoCaido < 10:
+                        frase = "eGela vuelve a estar disponible. Ha estado "
+                        frase += transformTime(tiempoCaido)
+                        twittea(frase)
+                    else:
+                        print("No se ha caido el suficiente tiempo para twittear")
+
+                # kontagailua = kontagailua + 1
+                booleanCounter = booleanCounter + 1
+                if booleanCounter == 60:
+                    frase = praOn.getRandomNoRepLine()
+                    print(frase)
+                    twittea(frase)
+                    booleanCounter = 0
+            elif state == 0:
                 booleanCounter = 0
-        else:
-            booleanCounter = 0
-            if prove and state == 0 and prevState == 1:
-                frase = praOff.getRandomNoRepLine
-                twitea(frase)
-                # pausa de 30 segundos para que si se ha caído no tuitee cada minuto que está caída
-                time.sleep(30)
+                #Solo va a twittear si anteriormente estaba activo, es decir va a twitear una sola vez cuando se caiga
+                if prevState == 1:
+                    tiempoCaido = time.monotonic()
+                    frase = praOff.getRandomNoRepLine()
+                    twittea(frase)
+                    # pausa de 30 segundos para que si se ha caído no tuitee cada minuto que está caída
+                    # time.sleep(30)
+            else:
+                booleanCounter = 0
+                if state == 3:
+                    print("Problemas de conexion")
+
+
 
 
         recordData(mean)
         now = datetime.now()
         current_time = now.strftime("%H:%M")
         print(current_time + " " + mean)
-
-        prevState = state
+        if prove:
+            prevState = state
         time.sleep(sleepTime)
 
+def transformTime(tiempoCaido):
+    tiempoCaido = int(tiempoCaido)
+    frase = ""
+    d = (tiempoCaido // 3600) // 24
+    h = (tiempoCaido // 3600) % 24
+    m = (tiempoCaido // 60) % 60
+    s = tiempoCaido % 60
+
+    if d != 0:
+        frase += str(d) + " dia"
+        if d != 1:
+            frase += "s"
+        if h != 0 or m != 0:
+            frase += ", "
+
+    if h != 0:
+        frase += str(h) + " hora"
+        if h != 1:
+            frase += "s"
+        if m != 0:
+            frase += ", "
+
+    if m != 0:
+        frase += str(m) + " minuto"
+        if m != 1:
+            frase += "s"
+
+    if m != 0 or h != 0 or d != 0:
+        frase += " y "
+
+    frase += str(s) + " segundo"
+    if s != 1:
+        frase += "s"
+    return frase
 
 def ipcheck(target, trust):
     statusT, resultT = sp.getstatusoutput(
@@ -131,26 +185,36 @@ def recordData(data):
 
 def confirmStatus(status, times, delay):
     global trustServer, evalServer
-    e = True
-    sta, mean = ipcheck(trustServer, evalServer)
-    while times > 0 and e:
+    stop = False
+    a = []
+    while times > 0 and not stop:
+        # Para sincronizar bien el tiempo que queremos que tarde en calcular
+        # ere = time.monotonic()
+        sta, mean = ipcheck(trustServer, evalServer)
+        a.append(sta)
         if sta != status:
-            e = False
-
-        times = times - 1
+            stop = True
+        """
+        delay = delay - (time.monotonic() - ere)
+        if delay < 0:
+            delay = 0
+        """
         time.sleep(delay)
-
-    return e
-
-
+        times = times - 1
+    return not stop, a
 
 
-print(api)
+#ere = time.monotonic()
+#trustServer = "google.com"
+#evalServer = "egela.ehu.eus"
+#print(confirmStatus(1,10,1))
+#print(time.monotonic()-ere)
 
-print(time.monotonic())
-print("time.monotonic()")
-time.sleep(1)
-print(time.time())
-print(time.monotonic())
-print(time.perf_counter())
-#main()
+#print("time.monotonic()")
+#time.sleep(1)
+#print(time.time())
+#print(time.monotonic())
+#print(time.perf_counter())
+
+main()
+

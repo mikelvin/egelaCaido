@@ -1,5 +1,6 @@
 import tweepy
 
+
 consumer_key = "hr8ClRl4AniT2jdRHSTfkKuWu"
 consumer_secret = "MHQpKBQCPFoRztKi4Z4MIKkCccgDtwTFQrXb4bLO2Xev5Mr5Yv"
 access_token = "1235232986909601793-YORkwEC1S6879MssIlsWnpYsgxtYgR"
@@ -8,6 +9,8 @@ access_token_secret = "BboF9MdYCZ8kgFDAQkSTXkSK5nOpVh23juDhqHba6vQGv"
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+
+blockTwitterForTesting = True
 
 def twittea(frase):
     global blockTwitterForTesting
