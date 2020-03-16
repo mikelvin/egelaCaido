@@ -17,6 +17,7 @@ evalServer = ""
 past = ""
 kontagailua = 0
 booleanCounter = 0
+egelaEstaCaido = False
 
 cwd = os.getcwd()  # Get the current working directory (cwd)
 files = os.listdir(cwd)  # Get all the files in that directory
@@ -95,12 +96,14 @@ def main():
                 # En este mismo programa tambien se calcula cuanto tiempo esta activado
                 if prevState == 0:
                     tiempoCaido = int(round(time.monotonic()-tiempoCaido))
-                    if tiempoCaido < 10:
-                        frase = "eGela vuelve a estar disponible. Ha estado "
+                    if egelaEstaCaido:
+                        egelaEstaCaido = False
+                        frase = "eGela vuelve a estar disponible. Ha estado caido "
                         frase += transformTime(tiempoCaido)
                         twittea(frase)
                     else:
-                        print("No se ha caido el suficiente tiempo para twittear")
+                        print("No se ha caido el suficiente tiempo como para twittear")
+                        sendMdToUsers("No se ha caido el suficiente tiempo como para twittear", warnToMD)
 
                 # kontagailua = kontagailua + 1
                 booleanCounter = booleanCounter + 1
@@ -113,11 +116,13 @@ def main():
                 booleanCounter = 0
                 #Solo va a twittear si anteriormente estaba activo, es decir va a twitear una sola vez cuando se caiga
                 if prevState == 1:
+                    egelaEstaCaido = False
                     tiempoCaido = time.monotonic()
+                    sendMdToUsers("PROGRAMA: state = 0, parece que se ha caido", warnToMD)
+                elif time.monotonic()-tiempoCaido > 60:
+                    egelaEstaCaido = True
                     frase = praOff.getRandomNoRepLine()
                     twittea(frase)
-                    # pausa de 30 segundos para que si se ha caído no tuitee cada minuto que está caída
-                    # time.sleep(30)
             else:
                 booleanCounter = 0
                 if state == 3:
