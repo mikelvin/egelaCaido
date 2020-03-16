@@ -123,7 +123,7 @@ def main():
                 if state == 3:
                     print("Problemas de conexion")
                     if prevState != 3:
-                        sendMdToMikel("Problemas de conexion", warnToMD)
+                        sendMdToUsers("Problemas de conexion", warnToMD)
 
         recordData(mean)
         now = datetime.now()

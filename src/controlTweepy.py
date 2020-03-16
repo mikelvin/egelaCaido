@@ -45,7 +45,7 @@ def twittea(frase):
     else:
         api.update_status(frase)
 
-    sendMdToMikel(frase, True)
+    sendMdToUsers(frase, True)
 
 
 def prevTweets(cuant):
