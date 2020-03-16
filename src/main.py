@@ -39,7 +39,7 @@ except FileNotFoundError as e:
     try:
         praOff = ControlFile(cwd + "/egelaCaido/src/phrasesOFF.txt", 5)
     except FileNotFoundError as e:
-        praOn = ControlFile("../egelaCaido/src/phrasesOFF.txt", 5)
+        praOff = ControlFile("../egelaCaido/src/phrasesOFF.txt", 5)
 
 
 
